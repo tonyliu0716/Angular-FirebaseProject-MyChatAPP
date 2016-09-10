@@ -1,6 +1,11 @@
 # Angular-FirebaseProject-MyChatAPP
 
 ### Some basic things you may want to know:
+1. You can visit and try to send message to your friend using this application, I have already uploaded to git-page.
+2. take a look: https://tonyliu0716.github.io/Angular-FirebaseProject-MyChatAPP/
+3. Some bootstrap templates I downloaded them from internet.
+4. This project mainly used Angular & AngualrFirebase & Firebase
+
 ### 1. AngularFire API:
 `https://github.com/firebase/angularfire/blob/master/docs/reference.md#watchcb-context`
 
@@ -20,7 +25,7 @@ factory("Auth", ['$firebaseAuth', function ($firebaseAuth) {
     return $firebaseAuth();
 }])
 ```
-Then use it in controller:
+Then can be injected in controller:
 ```javascript
 controller("LoginController", ['$scope', 'Auth', 'DataService', '$firebaseArray', '$location', '$log', '$rootScope',
               function ($scope, Auth, DataService, $firebaseArray, $location, $log, $rootScope) {
