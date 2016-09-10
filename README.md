@@ -1,6 +1,6 @@
 # Angular-FirebaseProject-MyChatAPP
 
-### Some basic things you may want to know:
+### Project Description:
 1. You can visit and try to send message to your friend using this application, I have already uploaded to git-page.
 2. take a look: https://tonyliu0716.github.io/Angular-FirebaseProject-MyChatAPP/
 3. Some bootstrap templates I downloaded them from internet.
