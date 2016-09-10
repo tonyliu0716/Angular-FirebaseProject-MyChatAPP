@@ -89,6 +89,23 @@ Delete Data:
 $scope.userInfos.$remove(...)
 ```
 
+### 7. Get record from firebase:
+```javascript
+//id should be the key:
+$scope.singleChats.$getRecord(UniqueKey)
+```
+
+### 8. Angularjs & Firebase: Three-way data binding
+```javascript
+//three way data binding: if something has been added to the array, div should auto update:
+$scope.singleChats.$watch(function (event) {
+      if (event.event === 'child_changed') {
+            $scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
+      }
+ //$scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
+});
+```
+
 
 
 
