@@ -426,6 +426,9 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
     //Members:
     var userInfoRef = firebase.database().ref('UserInfo');
     $scope.userInfos = $firebaseArray(userInfoRef);
+
+
+
     //groups is an array
     //should be store in firebase
     $scope.groups = [];
@@ -449,7 +452,7 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
             $scope.keepGoing = true;
             $scope.backgroundColorChange = true;
             $scope.memberIndex = index;
-            $log.info(index);
+
             //for-loop to check if the these two users had conversation before
             $scope.singleChats.$loaded().then(function (chatHistory) {
                 angular.forEach(chatHistory, function (chat, index) {
@@ -473,14 +476,19 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
                 });
                 //==================if this is a new conversation===============
                 if ($scope.keepGoing) {
+                    // clear the div area:
+                    $scope.chatHistorys = [];
                     var chat = {
                         from: $scope.DataService.userInfo.id,
                         to: member.$id,
                         messages: [{
                             from: $scope.DataService.userInfo.id,
-                            message: null
+                            message: "Start to chat with..."
                         }]
-                    }
+                    };
+                    //get the user image from db
+                    $scope.talkToImage = member.image;
+                    $scope.DataService.userInfo.image = $scope.DataService.obj.userImage;
                     $scope.singleChats.$add(chat).then(function (singleChatRef) {
                         $scope.DataService.singleChatId.id = singleChatRef.key;
 
@@ -488,7 +496,11 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
                 }
             });
 
+
+
         } // finish talkTo method=====================
+
+
 
     $scope.sendMessage = function () {
         if ($scope.inputMessage !== null) {
@@ -499,9 +511,18 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
             var record = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id);
             record.messages.push(newMessage);
             $scope.singleChats.$save(record);
-            //show updates
+
+            //updates from db
             $scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
             $scope.inputMessage = "";
+
+            //three way data binding: if something has been added to the array, div should auto update:
+            $scope.singleChats.$watch(function (event) {
+                if (event.event === 'child_changed') {
+                    $scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
+                }
+                //$scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
+            });
 
             //after updates: auto scroll to the buttom using jquery, but this one is not working perfectly.
 
