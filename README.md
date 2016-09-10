@@ -84,6 +84,12 @@ Update Data:
 $scope.userInfos.$save(obj).then(function (userInfoRef) {});
 ```
 
+Delete Data:
+```javascript
+$scope.userInfos.$remove(...)
+```
+
+
 
 
 
