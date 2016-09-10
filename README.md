@@ -66,11 +66,22 @@ $scope.userInfos.$loaded().then(function (lists) {
 ```
 
 ### 6. AngularFire CRUD
+Define where we should go and fetch:
+```javascript
+var userInfoRef = firebase.database().ref('UserInfo');
+$scope.userInfos = $firebaseArray(userInfoRef);
+```
+
 Add new Data:
 ```javascript
 $scope.userInfos.$add(UserInfo).then(function (userInfoRef) {
    ...
 }
+```
+
+Update Data:
+```javascript
+$scope.userInfos.$save(obj).then(function (userInfoRef) {});
 ```
 
 
