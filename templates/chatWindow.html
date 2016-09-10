@@ -1,0 +1,118 @@
+<div id="ChatRoomCustoms" ng-controller="WindowController">
+    <div class="container bootstrap snippet">
+        <div class="row">
+            <div class="col-md-4 bg-white ">
+                <!-- accordion starts here -->
+                <uib-accordion>
+                    <!-- members list start from here ================================= -->
+                    <div uib-accordion-group class="panel-default member-pane">
+                        <uib-accordion-heading>
+                            <i class="fa fa-caret-square-o-right"></i> Members
+                        </uib-accordion-heading>
+                        <!-- friends list start from here -->
+                        <ul class="friend-list">
+                            <li class="bounceInDown" ng-repeat="member in userInfos">
+                                <a class="clearfix" ng-click="talkTo(member, $index)" ng-class="{'backgroundColorChange': $index === memberIndex}">
+                                    <i ng-class="{'fa fa-commenting':member.active,'fa fa-comment-o':!member.active}"></i> &nbsp;
+
+                                    <img ng-src="{{member.image}}" class="img-circle">
+
+                                    <div class="friend-name">
+                                        <strong>&nbsp;ID NAME: {{member.username}}</strong>
+                                    </div>
+                                    <div class="last-message text-muted">{{member.$id}}</div>
+                                    <small class="time text-muted">time stamp</small>
+                                    <small class="chat-alert label label-danger">1</small>
+
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <!-- members list ends here -->
+
+                    <!-- groups list starts here -->
+                    <div uib-accordion-group class="panel-default">
+                        <uib-accordion-heading>
+                            <i class="fa fa-caret-square-o-right"></i>Groups
+                        </uib-accordion-heading>
+                        <ul class="friend-list">
+                            <!-- class="active" can be added -->
+                            <li class="bounceInDown" ng-repeat="channel in groups">
+                                <a class="clearfix">
+                                    <img src="img/group.ico" alt="" class="img-circle"> &nbsp;
+                                    <div class="last-message text-muted"><strong>&nbsp;&nbsp; {{channel.name}}</strong></div>
+                                    <small class="time text-muted"></small>
+                                    <small class="chat-alert label label-danger" ng-show="channel.password !== null"><i class="fa fa-lock" aria-hidden="true"></i></small>
+                                    <small class="chat-alert label label-success" ng-show="channel.password == null"><i class="fa fa-unlock" aria-hidden="true"></i></small>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div uib-accordion-group class="panel-default">
+                        <uib-accordion-heading>
+                            <i class="fa fa-caret-square-o-right"></i>Create a Group
+                        </uib-accordion-heading>
+
+
+                        <!-- Create a new group form -->
+                        <div class="col-md-9 col-md-offset-1">
+                            <form role="form" ng-submit="onSubmit()">
+                                <div class="form-group">
+                                    <label for="newGroup">Group Name:</label>
+                                    <input type="text" class="form-control" placeholder="Create a new Group" ng-model="group.name"> {{name}}
+                                </div>
+                                <div class="form-group">
+                                    <label for="groupPassword">Password:</label>
+                                    <input type="password" class="form-control" ng-model="group.password" placeholder="Password for this group">
+                                    <label><i class="fa fa-star" aria-hidden="true"></i> &nbsp; If you want this group going to be public, just make sure the password is blank. Otherwise, create a password.</label>
+                                </div>
+                                <button type="submit" class="btn btn-success">New Group</button>
+                            </form>
+
+                        </div>
+                    </div>
+                </uib-accordion>
+
+                <!-- =============================================================== -->
+                <!-- accordion ends here -->
+
+            </div>
+
+            <!--=========================================================-->
+            <!-- chatting history -->
+            <div class="col-md-8 bg-white tab-pane">
+                <div class="chat-message" id="ChatMessage">
+                    <ul class="chat">
+                        <li ng-repeat="single in chatHistorys track by $index" ng-class="{'left clearfix':single.from !== DataService.userInfo.id, 'right clearfix': single.from === DataService.userInfo.id}">
+                            <span ng-class="{'chat-img pull-left':single.from !== DataService.userInfo.id, 'chat-img pull-right' : single.from === DataService.userInfo.id}">
+                                <img ng-show="single.from !== DataService.userInfo.id" ng-src="{{talkToImage}}">
+                                <img ng-show="single.from === DataService.userInfo.id" ng-src="{{DataService.userInfo.image}}">
+                            </span>
+                            <div class="chat-body clearfix">
+                                <div class="header">
+                                    <strong class="primary-font" ng-show="single.from !== DataService.userInfo.id">{{memberName}}</strong>
+                                    <strong class="primary-font" ng-show="single.from === DataService.userInfo.id">{{DataService.userInfo.username}}</strong>
+                                    <small class="pull-right text-muted"><i class="fa fa-clock-o"></i> 12 mins ago</small>
+                                </div>
+                                <p>
+                                    {{single.message}}
+                                </p>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+                <div class="chat-box bg-white">
+                    <div class="input-group">
+                        <input class="form-control border no-shadow no-rounded" placeholder="Type your message here" ng-model="inputMessage" ng-keypress="$event.which === 13 && sendMessage()">
+                        <span class="input-group-btn">
+                            <button class="btn btn-success no-rounded" type="button" ng-click="sendMessage()">Send</button>
+            		</span>
+                    </div>
+                    <!-- /input-group -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

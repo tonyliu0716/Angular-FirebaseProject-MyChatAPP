@@ -1,0 +1,83 @@
+<div class="row" ng-controller="ChatController">
+    <header>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12" ng-init="initLoading()">
+                    <img class="img-responsive img-circle" width="156" height="156" ng-src="{{DataService.obj.userImage}}" ng-show="!DataService.user.anonymous">
+
+                    <div class="row" ng-show="{{DataService.user.anonymous}}">
+                        <div class="intro-text">
+                            <span class="skills">Please choose your user image:</span>
+                        </div>
+                        <br>
+                        <br>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('img/anonymous_man.png')">
+                                <img src="img/anonymous_man.png">
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('img/anonymous_wm.png')">
+                                <img src="img/anonymous_wm.png">
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('http://bootdey.com/img/Content/avatar/avatar6.png')">
+                                <img class="img-responsive img-circle" height="128" width="128" ng-src="http://bootdey.com/img/Content/avatar/avatar6.png">
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('http://bootdey.com/img/Content/avatar/avatar3.png')">
+                                <img class="img-responsive img-circle" height="128" width="128" ng-src="http://bootdey.com/img/Content/avatar/avatar3.png">
+                            </a>
+                        </div>
+                        <!-- new image style -->
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('http://bootdey.com/img/Content/user_1.jpg')">
+                                <img class="img-responsive img-circle" height="128" width="128" ng-src="http://bootdey.com/img/Content/user_1.jpg">
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('http://bootdey.com/img/Content/user_2.jpg')">
+                                <img class="img-responsive img-circle" height="128" width="128" ng-src="http://bootdey.com/img/Content/user_2.jpg">
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('http://bootdey.com/img/Content/user_3.jpg')">
+                                <img class="img-responsive img-circle" height="128" width="128" ng-src="http://bootdey.com/img/Content/user_3.jpg">
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="" class="thumbnail" ng-click="chooseImage('http://bootdey.com/img/Content/avatar/avatar7.png')">
+                                <img class="img-responsive img-circle" height="128" width="128" ng-src="http://bootdey.com/img/Content/avatar/avatar7.png">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="intro-text">
+                    <span class="skills" style="background-color:'burlywood'">{{userMessage}}</span>
+                    <span ng-show="icon"><i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i></span>
+                </div>
+                <div class="intro-text">
+                    <a ng-if="!DataService.userInfo.anonymous" class="btn btn-lg btn-outline">
+                        <span ng-if="loading"><i class="fa fa-spinner fa-spin fa-2x fa-fw"></i></span>
+                        <span ng-if="!loading" ng-click="relocatedTo()"><i class="fa fa-comments-o"></i> Chat now!</span>
+                    </a>
+                    <a ng-if="DataService.userInfo.anonymous" ng-class="{'btn btn-lg btn-outline':userMessage, 'btn btn-lg btn-outline disabled': !userMessage}">
+                        <span ng-if="loading"><i class="fa fa-spinner fa-spin fa-2x fa-fw"></i></span>
+                        <span ng-if="!loading" ng-click="relocatedToAnony()"><i class="fa fa-comments-o"></i> Chat now!</span>
+                    </a>
+                    <span class="name" ng-show="DataService.user.anonymous">Welcome, anonymous user!</span>
+                    <span class="name" ng-show="!DataService.user.anonymous">Welcome, {{DataService.obj.username}}</span>
+                    <hr class="star-light">
+                    <span class="skills">{{DataService.obj.email}}</span>
+                    <br>
+                    <span class="skills">{{DataService.user.message}}</span>
+                    <br>
+                    <span class="skills">Comunicate with your friends today!</span>
+                </div>
+            </div>
+        </div>
+
+    </header>
+</div>
