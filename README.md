@@ -46,7 +46,13 @@ controller("LoginController", ['$scope', 'Auth', 'DataService', '$firebaseArray'
 }
 ```
 
-### 4. $loaded method
+### 4. Auth sign out
+This method will return a promise when the whole content was download from firebase
+```javascript
+Auth.$sighOut();
+```
+
+### 5. $loaded method
 This method will return a promise when the whole content was download from firebase
 ```javascript
 var userInfoRef = firebase.database().ref('UserInfo');
@@ -58,6 +64,15 @@ $scope.userInfos.$loaded().then(function (lists) {
     });
 );
 ```
+
+### 6. AngularFire CRUD
+Add new Data:
+```javascript
+$scope.userInfos.$add(UserInfo).then(function (userInfoRef) {
+   ...
+}
+```
+
 
 
 
