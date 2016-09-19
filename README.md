@@ -5,6 +5,7 @@
 2. take a look: https://tonyliu0716.github.io/Angular-FirebaseProject-MyChatAPP/
 3. Some bootstrap templates I downloaded them from internet.
 4. This project mainly used Angular & AngualrFirebase & Firebase
+5. UI-Bootstrap for modal: http://angular-ui.github.io/bootstrap/versioned-docs/0.14.3/#/modal
 
 ### 1. AngularFire API:
 `https://github.com/firebase/angularfire/blob/master/docs/reference.md#watchcb-context`
