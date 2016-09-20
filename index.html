@@ -59,7 +59,7 @@
                         <a href="#login">Login</a>
                     </li>
                     <li ng-show="DataService.user.exist" ng-click="logout()">
-                        <a href="">Logout</a>
+                        <a href="" ng-cloak>Welcome, {{DataService.userInfo.username}} &nbsp;&nbsp;&nbsp;&nbsp;Logout</a>
                     </li>
                 </ul>
             </div>
@@ -111,7 +111,8 @@
     <script src="js/freelancer.min.js"></script>
     <!-- Angualr CSS to secifiy which css template we want to use in html page -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-css/1.0.8/angular-css.min.js"></script>
-
+    <!-- Angular UI Bootstarp component -->
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.3.js"></script>
     <!-- My Js file -->
     <script src="app.js"></script>
 </body>

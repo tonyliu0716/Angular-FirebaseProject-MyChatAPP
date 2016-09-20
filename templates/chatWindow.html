@@ -18,11 +18,11 @@
                                     <img ng-src="{{member.image}}" class="img-circle">
 
                                     <div class="friend-name">
-                                        <strong>&nbsp;ID NAME: {{member.username}}</strong>
+                                        <strong>&nbsp; {{member.username}}</strong>
                                     </div>
-                                    <div class="last-message text-muted">{{member.$id}}</div>
-                                    <small class="time text-muted">time stamp</small>
-                                    <small class="chat-alert label label-danger">1</small>
+                                    <div class="last-message text-muted"></div>
+                                    <small class="time text-muted"></small>
+                                    <small class="chat-alert label label-danger"><i class="fa fa-envelope" ></i></small>
 
                                 </a>
                             </li>
@@ -39,9 +39,33 @@
                         <ul class="friend-list">
                             <!-- class="active" can be added -->
                             <li class="bounceInDown" ng-repeat="channel in groups">
-                                <a class="clearfix">
-                                    <img src="img/group.ico" alt="" class="img-circle"> &nbsp;
-                                    <div class="last-message text-muted"><strong>&nbsp;&nbsp; {{channel.name}}</strong></div>
+                                <a class="clearfix" ng-class="{'backgroundColorChange': $index === groupIndex}">
+                                    <img src="img/group.ico" class="img-circle"> &nbsp;
+                                    <div class="last-message text-muted">
+                                        <strong>&nbsp;&nbsp; {{channel.groupName}} &nbsp;</strong>
+                                        <!--<input id="channel{{$index}}" type="text" ng-show="channel.password != null" size="16" placeholder="Password" value="" /> -->
+                                        <button type="button" class="btn-xs btn-info" ng-show="channel.password != null && channel.password !== $scope.groupPassword.password" ng-click="open(channel, $index)">Enter</button>
+                                        <button type="button" class="btn-xs btn-success" ng-show="channel.password == $scope.groupPassword.password && chatNow" ng-click="openContent(channel, $index)">Join</button>
+                                        <!--============================ Modal shows here=========================== -->
+                                        <script type="text/ng-template" id="myModalContent.html">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title">Please enter the password</h3>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="password" value="" ng-model="groupPassword.password" />
+                                                <br>
+                                                <span ng-show="messageShow"><p><i class="fa fa-exclamation-circle" aria-hidden="true" style="color:red"></i> &nbsp; {{errorMessage}}</p></span>
+                                                <span ng-show="successMessage"><p><i class="fa fa-check" aria-hidden="true" style="color:#1EA277"></i> &nbsp; {{successMessage}}</p></span>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-primary" type="button" ng-click="ok()" ng-if="!iconLoading">Submit</button>
+                                                <i class="fa fa-spinner fa-pulse fa-2x fa-fw" ng-if="iconLoading"></i>
+                                                <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+                                            </div>
+                                        </script>
+                                        <!--============================ Modal ends here=========================== -->
+                                    </div>
+                                    <!-- Modal shows here -->
                                     <small class="time text-muted"></small>
                                     <small class="chat-alert label label-danger" ng-show="channel.password !== null"><i class="fa fa-lock" aria-hidden="true"></i></small>
                                     <small class="chat-alert label label-success" ng-show="channel.password == null"><i class="fa fa-unlock" aria-hidden="true"></i></small>
@@ -65,7 +89,9 @@
                                 <div class="form-group">
                                     <label for="groupPassword">Password:</label>
                                     <input type="password" class="form-control" ng-model="group.password" placeholder="Password for this group">
-                                    <label><i class="fa fa-star" aria-hidden="true"></i> &nbsp; If you want this group going to be public, just make sure the password is blank. Otherwise, create a password.</label>
+                                    <label ng-show="!notNullMessage && !successCreate"><i class="fa fa-star" aria-hidden="true"></i> &nbsp; If you want this group going to be public, just make sure the password is blank. Otherwise, create a password.</label>
+                                    <label ng-show="notNullMessage"><i class="fa fa-exclamation-triangle" style="color: red"> </i>&nbsp; {{notNullMessage}}</label>
+                                    <label ng-show="successCreate"><i class="fa fa-sign-language" style="color: red"> </i>&nbsp; {{successCreate}}</label>
                                 </div>
                                 <button type="submit" class="btn btn-success">New Group</button>
                             </form>
@@ -86,14 +112,14 @@
                     <ul class="chat">
                         <li ng-repeat="single in chatHistorys track by $index" ng-class="{'left clearfix':single.from !== DataService.userInfo.id, 'right clearfix': single.from === DataService.userInfo.id}">
                             <span ng-class="{'chat-img pull-left':single.from !== DataService.userInfo.id, 'chat-img pull-right' : single.from === DataService.userInfo.id}">
-                                <img ng-show="single.from !== DataService.userInfo.id" ng-src="{{talkToImage}}">
+                                <img ng-show="single.from !== DataService.userInfo.id" ng-src="{{ groupClick === true ?userImagesForGroup[$index] : talkToImage }}">
                                 <img ng-show="single.from === DataService.userInfo.id" ng-src="{{DataService.userInfo.image}}">
                             </span>
                             <div class="chat-body clearfix">
                                 <div class="header">
-                                    <strong class="primary-font" ng-show="single.from !== DataService.userInfo.id">{{memberName}}</strong>
+                                    <strong class="primary-font" ng-show="single.from !== DataService.userInfo.id">{{memberName == null ? userNameForGroup[$index] : memberName}}</strong>
                                     <strong class="primary-font" ng-show="single.from === DataService.userInfo.id">{{DataService.userInfo.username}}</strong>
-                                    <small class="pull-right text-muted"><i class="fa fa-clock-o"></i> 12 mins ago</small>
+                                    <small class="pull-right text-muted"><i class="fa fa-clock-o"></i>a while ago..</small>
                                 </div>
                                 <p>
                                     {{single.message}}
@@ -105,9 +131,11 @@
                 </div>
                 <div class="chat-box bg-white">
                     <div class="input-group">
-                        <input class="form-control border no-shadow no-rounded" placeholder="Type your message here" ng-model="inputMessage" ng-keypress="$event.which === 13 && sendMessage()">
+                        <input ng-show="!groupClick" class="form-control border no-shadow no-rounded" placeholder="Type your message here" ng-model="inputMessage" ng-keypress="$event.which === 13 && sendMessage()">
+                        <input ng-show="groupClick" class="form-control border no-shadow no-rounded" placeholder="Type your message here" ng-model="inputGroupMessage" ng-keypress="$event.which === 13 && groupSendMessage()">
                         <span class="input-group-btn">
-                            <button class="btn btn-success no-rounded" type="button" ng-click="sendMessage()">Send</button>
+                            <button ng-show="!groupClick" class="btn btn-success no-rounded" type="button" ng-click="sendMessage()">Send Single</button>
+                            <button ng-show="groupClick" class="btn btn-info no-rounded" type="button" ng-click="groupSendMessage()">Send Group</button>
             		</span>
                     </div>
                     <!-- /input-group -->
