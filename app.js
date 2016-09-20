@@ -4,6 +4,7 @@
 //more info looks here: http://angular-ui.github.io/bootstrap/#/getting_started
 
 //luegg.directives: using for Angularjs auto scrolling to buttom
+// ui.bootstrap is using for angular modal module...
 var app = angular.module("myChat", ['ngRoute', 'firebase', 'angularCSS', 'ngAnimate', 'ngSanitize', 'ui.bootstrap']).
 
 factory("Auth", ['$firebaseAuth', function ($firebaseAuth) {
@@ -43,7 +44,15 @@ service("DataService", [function () {
 
     this.singleChatId = {
         id: ""
-    }
+    };
+
+    this.channelPassword = {
+        password: ""
+    };
+
+    this.publicChannel = {
+        id: ""
+    };
 }]).
 
 config(function ($routeProvider) {
@@ -421,34 +430,251 @@ controller("ChatController", ['$scope', 'DataService', '$firebaseArray', '$locat
 
 }]).
 
-controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log', '$location', '$anchorScroll', function ($scope, $firebaseArray, DataService, $log, $location, $anchorScroll) {
+controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log', '$location', '$uibModal', function ($scope, $firebaseArray, DataService, $log, $location, $uibModal) {
     $scope.DataService = DataService;
     //Members:
     var userInfoRef = firebase.database().ref('UserInfo');
     $scope.userInfos = $firebaseArray(userInfoRef);
 
 
+    //============================start create group chat:================================
+    var groupsChatRef = firebase.database().ref('Groups');
+    $scope.groupsChat = $firebaseArray(groupsChatRef);
 
-    //groups is an array
-    //should be store in firebase
-    $scope.groups = [];
+    //return promise after the data was loaded from firebase
+    $scope.groupsChat.$loaded().then(function (lists) {
+        $scope.groups = lists;
+    });
 
-    //
     $scope.group = {};
-
-    $scope.onSubmit = function () {
-
-        $scope.groups.push($scope.group);
-        $scope.group = {};
-        $log.info($scope.groups);
+    //unlock group method:
+    $scope.unlockGroup = function (group) {
+        $log.info("I am in the unlock method...");
     }
 
+    //onSubmit method: create a new chat group
+    $scope.onSubmit = function () {
+        // if username is undefined, return
+        if ($scope.group.name === undefined) {
+            $scope.notNullMessage = 'Group Name can not be null!';
+            return;
+        }
+        if ($scope.group.name !== null) {
+            //password not null:
+            if ($scope.group.password !== null) {
+                var group = {
+                        groupName: $scope.group.name,
+                        members: [$scope.DataService.userInfo.id],
+                        messages: [{
+                            from: $scope.DataService.userInfo.id,
+                            message: "Start to chat with..."
+                   }],
+                        password: $scope.group.password
+                    }
+                    //create a group with password
+                $scope.groupsChat.$add(group).then(function (groupsChatRef) {});
+                $log.info($scope.groupsChat);
+            }
+
+            //password is null, that means this group will be public:
+            if ($scope.group.password === undefined) {
+                var group = {
+                        groupName: $scope.group.name,
+                        members: [$scope.DataService.userInfo.id],
+                        messages: [{
+                            from: $scope.DataService.userInfo.id,
+                            message: "Start to chat with..."
+                        }],
+                        password: null
+                    }
+                    //create a new group without password
+                $scope.groupsChat.$add(group).then(function (groupsChatRef) {});
+            }
+        }
+        //TODO: update all the groups on view
+        //after submit, clear the text field
+        $scope.group = {};
+        $scope.successCreate = "You has successfully created a new Group!";
+        setTimeout(function () {
+            $scope.$apply(function () {
+                $scope.successCreate = "";
+            });
+        }, 5000);
+
+    };
+    $scope.groupClick = false;
+    $scope.channelOpen = false;
+    $scope.chatNow = true;
+    //==============================if this group is public==================================
+    $scope.openContent = function (channel, index) {
+
+        //this 'Join' button disappear
+
+        //show group click button
+        $scope.groupClick = true;
+        $scope.channelOpen = true;
+        $scope.groupIndex = index;
+        $scope.DataService.userInfo.image = $scope.DataService.obj.userImage;
+        //store the user information into members column
+        //set a flag
+        $scope.flagForGroups = false;
+        angular.forEach($scope.groupsChat.$getRecord(channel.$id).members, function (member, index) {
+            if (member === $scope.DataService.userInfo.id) {
+                // that means this user already inside the group
+                $scope.flagForGroups = true;
+                return;
+            }
+        });
+        if (!$scope.flagForGroups) {
+            //that means this user is the first time to join the group
+            var member = $scope.DataService.userInfo.id;
+            $scope.groupsChat.$getRecord(channel.$id).members.push(member);
+        }
+        $scope.DataService.publicChannel.id = channel.$id;
+        $log.info($scope.DataService.publicChannel.id);
+        //get the user Images from userInfo
+
+        $scope.chatHistorys = $scope.groupsChat.$getRecord(channel.$id).messages;
+        $scope.userImagesForGroup = [];
+        $scope.userNameForGroup = [];
+        angular.forEach($scope.chatHistorys, function (message, index) {
+            var memberIdForGroup = message.from;
+            $log.info(memberIdForGroup);
+            var image_url = $scope.userInfos.$getRecord(memberIdForGroup).image;
+            $log.info($scope.userInfos.$getRecord(memberIdForGroup));
+            var username_forGroup = $scope.userInfos.$getRecord(memberIdForGroup).username;
+            $scope.userImagesForGroup.push(image_url);
+            $scope.userNameForGroup.push(username_forGroup);
+        });
+        $log.info($scope.userNameForGroup);
+        // three-ways data binding
+        $scope.groupsChat.$watch(function (event) {
+            if (event.event === 'child_changed' && $scope.groupClick === true) {
+                var length = $scope.groupsChat.$getRecord(event.key).messages.length;
+                var image = $scope.userInfos.$getRecord($scope.groupsChat.$getRecord(event.key).messages[length - 1].from).image;
+                $scope.userImagesForGroup.push(image);
+                $log.info($scope.userImagesForGroup.length);
+
+                $scope.chatHistorys = $scope.groupsChat.$getRecord(channel.$id).messages;
+            }
+            //$scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
+        });
+
+        //set scroll to bottom:
+        $('#ChatMessage').bind('DOMNodeInserted', function () {
+            $('div.tab-pane').scrollTop($('#ChatMessage').height());
+        });
+    }
+
+    //==============================Angular UI bootstrap modal start=========================
+
+    $scope.open = function (channel, index) {
+        //if the user already unlock this group channel
+
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'myModalContent.html',
+            controller: 'ModalInstanceController',
+            resolve: {
+                password: function () {
+                    return channel.password;
+                },
+                id: function () {
+                    return channel.$id;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (transferData) {
+            //set password equal to true, user unlock
+            channel.password = transferData.password;
+
+            //background-color change:
+            $scope.groupIndex = index;
+            $scope.groupClick = true;
+            //open this channel
+            $scope.channelOpen = true;
+            //reopen the public channel
+            $scope.chatNow = true;
+        }, function () {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
+        //var value = $('#channel' + index).val();
+        //        if (value !== "") {
+        //            //compare the channel password and the user input
+        //            if (channel.password === value) {
+        //                //update the div, show the message
+        //                $scope.groupClick = true;
+        //                //unlock icon
+        //                channel.password = null;
+        //                //open this channel
+        //                $scope.channelOpen = true;
+        //                $scope.groupIndex = index;
+        //
+        //            } else {
+        //                $('#channel' + index).val("Incorrect!");
+        //            }
+        //        }
+
+    };
+
+    $scope.canel = function () {
+        $scope.showModal = false;
+    };
+
+    //==============================Angular UI bootstrap modal end=========================
+
+    //==============================Group send message start here==========================
+    $scope.groupSendMessage = function () {
+
+        if ($scope.inputGroupMesssage !== null) {
+            //update message to firebase
+            var message = {
+                from: $scope.DataService.userInfo.id,
+                message: $scope.inputGroupMessage
+            };
+            var record = $scope.groupsChat.$getRecord($scope.DataService.publicChannel.id);
+            record.messages.push(message);
+            $scope.groupsChat.$save(record);
+
+            $scope.inputGroupMessage = "";
+            //three-way data binding:
+            $scope.groupsChat.$watch(function (event) {
+                if (event.event === 'child_changed' && $scope.groupClick === true) {
+                    $scope.chatHistorys = $scope.groupsChat.$getRecord($scope.DataService.publicChannel.id).messages;
+                }
+                //$scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
+            });
+            //set scroll to bottom:
+            $('#ChatMessage').bind('DOMNodeInserted', function () {
+                $('div.tab-pane').scrollTop($('#ChatMessage').height());
+            });
+
+        }
+
+
+
+    };
+
+    //==============================Group send message ends here==========================
+
+
+    // ==========================start create single chat channel:=============================
     var singleChatRef = firebase.database().ref('Single-Chats');
     $scope.singleChats = $firebaseArray(singleChatRef);
 
     $scope.backgroundColorChange = false;
     //implement talkTo() 
     $scope.talkTo = function (member, index) {
+
+            $scope.userImagesForGroup = [];
+            $scope.userNameForGroup = [];
+            //reopen the public channel
+            if (member.$id === $scope.DataService.userInfo.id) {
+                return;
+            }
+            $scope.chatNow = true;
+            $scope.groupClick = false;
             $scope.keepGoing = true;
             $scope.backgroundColorChange = true;
             $scope.memberIndex = index;
@@ -512,13 +738,13 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
             record.messages.push(newMessage);
             $scope.singleChats.$save(record);
 
-            //updates from db
+            //get updates from db
             $scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
             $scope.inputMessage = "";
 
             //three way data binding: if something has been added to the array, div should auto update:
             $scope.singleChats.$watch(function (event) {
-                if (event.event === 'child_changed') {
+                if (event.event === 'child_changed' && $scope.groupClick === false) {
                     $scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
                 }
                 //$scope.chatHistorys = $scope.singleChats.$getRecord($scope.DataService.singleChatId.id).messages;
@@ -537,4 +763,38 @@ controller("WindowController", ['$scope', '$firebaseArray', 'DataService', '$log
     }
 
 
+}]).
+controller("ModalInstanceController", ['$scope', '$uibModalInstance', 'password', 'id', 'DataService', '$log', function ($scope, $uibModalInstance, password, id, DataService, $log) {
+    $scope.DataService = DataService;
+    $scope.groupPassword = {};
+    $scope.messageShow = false;
+    $scope.iconLoading = false;
+    $scope.ok = function () {
+        if (password !== $scope.groupPassword.password) {
+            $scope.messageShow = true;
+            $scope.errorMessage = "The password is incorrect!";
+            return;
+        } else {
+            $scope.messageShow = false;
+            $scope.iconLoading = true;
+            $scope.successMessage = "The password is correct!";
+
+            //unlock the channel, set channel password equal to null
+            setTimeout(function () {
+                $scope.$apply(function () {
+                    $scope.iconLoading = false;
+                    $uibModalInstance.close({
+                        password: null,
+                        id
+                    });
+                });
+            }, 2400);
+        }
+
+
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
 }]);
